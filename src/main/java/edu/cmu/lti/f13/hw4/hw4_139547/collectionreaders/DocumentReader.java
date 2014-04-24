@@ -15,6 +15,7 @@ extends JCasAnnotator_ImplBase  {
 	@Override
 	public void process(JCas jcas) 
 			throws AnalysisEngineProcessException {
+		System.out.println("\n------------------Started DocumentReader ------------------\n");
 		
 		// reading sentence from the CAS 
 		String sLine = jcas.getDocumentText();
@@ -23,14 +24,19 @@ extends JCasAnnotator_ImplBase  {
 		ArrayList<String> docInfo = parseDataLine(sLine);
 		
 		//This is to make sure that parsing done properly and 
-		//minimal data for rel,qid,text are available to proceed 
+		//minimal data for rel,qid,text are available to proceed		
 		if(docInfo.size()<3){
 			System.err.println("Not enough information in the line");
 			return;
 		}
+		
 		int rel = Integer.parseInt(docInfo.get(0));
 		int qid = Integer.parseInt(docInfo.get(1));
 		String txt = docInfo.get(2);
+		System.out.println("rel: "+rel);
+		System.out.println("quid: "+qid);
+		System.out.println("txt: "+txt);
+		//Data parsed correctly until this point!!
 		
 		Document doc = new Document(jcas);
 		doc.setText(txt);
@@ -38,9 +44,11 @@ extends JCasAnnotator_ImplBase  {
 		//Setting relevance value
 		doc.setRelevanceValue(rel);
 		doc.addToIndexes();
-		
 		//Adding populated FeatureStructure to CAS
 		jcas.addFsToIndexes(doc);
+		
+		System.out.println("\n------------------------------------------------------------------------\n");
+		
 	}
 
 

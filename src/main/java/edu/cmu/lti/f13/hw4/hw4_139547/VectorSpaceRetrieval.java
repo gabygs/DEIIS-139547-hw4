@@ -43,6 +43,8 @@ public class VectorSpaceRetrieval {
 		String sLine;
 		long startTime=System.currentTimeMillis();
 		
+		System.out.println("\n********************* Started VectorSpaceRetrieval *********************\n");
+		
 		URL descUrl = VectorSpaceRetrieval.class.getResource("/descriptors/retrievalsystem/VectorSpaceRetrieval.xml");
 	   if (descUrl == null) {
 	      throw new IllegalArgumentException("Error opening VectorSpaceRetrieval.xml");
@@ -71,6 +73,7 @@ public class VectorSpaceRetrieval {
 		
 		double totalTime=(endTime-startTime)/1000.0;
 		System.out.println("Total time taken: "+totalTime);
+		System.out.println("\n***************************************************************\n");
 		
 
 	}

@@ -15,6 +15,8 @@ import org.apache.uima.resource.ResourceProcessException;
 import org.apache.uima.util.ProcessTrace;
 
 import edu.cmu.lti.f13.hw4.hw4_139547.typesystems.Document;
+import edu.cmu.lti.f13.hw4.hw4_139547.typesystems.Token;
+import edu.cmu.lti.f13.hw4.hw4_139547.utils.Utils;
 
 
 public class RetrievalEvaluator extends CasConsumer_ImplBase {
@@ -29,7 +31,6 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 	public void initialize() throws ResourceInitializationException {
 
 		qIdList = new ArrayList<Integer>();
-
 		relList = new ArrayList<Integer>();
 
 	}
@@ -55,13 +56,20 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 
 			//Make sure that your previous annotators have populated this in CAS
 			FSList fsTokenList = doc.getTokenList();
+			
+			System.out.println("Doc: " + doc.getText()); 
+			for (Token t :Utils.fromFSListToCollection(fsTokenList, Token.class))
+				System.out.println("TokenList contains: " + t.getText() + " -- Frequency: " + t.getFrequency());
+
+
 			//ArrayList<Token>tokenList=Utils.fromFSListToCollection(fsTokenList, Token.class);
+			
+			//System.out.println("getQueryID(): "+doc.getQueryID() + " -- getText: " + doc.getText() + " -- getRelevanceValue: " + doc.getRelevanceValue());
 
 			qIdList.add(doc.getQueryID());
 			relList.add(doc.getRelevanceValue());
 			
 			//Do something useful here
-
 		}
 
 	}
@@ -74,6 +82,9 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 	public void collectionProcessComplete(ProcessTrace arg0)
 			throws ResourceProcessException, IOException {
 
+		//System.out.println("\n------------------------------------------------------------------------\n");
+		System.out.println("\n------------------Started RetrievalEvaluator ------------------\n");
+		
 		super.collectionProcessComplete(arg0);
 
 		// TODO :: compute the cosine similarity measure
@@ -87,6 +98,8 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 		// TODO :: compute the metric:: mean reciprocal rank
 		double metric_mrr = compute_mrr();
 		System.out.println(" (MRR) Mean Reciprocal Rank ::" + metric_mrr);
+		System.out.println("\n------------------------------------------------------------------------\n");
+		
 	}
 
 	/**
@@ -98,6 +111,7 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 		double cosine_similarity=0.0;
 
 		// TODO :: compute cosine similarity between two sentences
+		
 		
 
 		return cosine_similarity;
