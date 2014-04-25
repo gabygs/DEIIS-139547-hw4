@@ -12,7 +12,7 @@ import org.apache.uima.jcas.tcas.Annotation;
 
 
 /** 
- * Updated by JCasGen Fri Apr 25 00:08:31 CDT 2014
+ * Updated by JCasGen Fri Apr 25 18:13:22 CDT 2014
  * XML source: /Users/IBAGNOG/Documents/workspace/hw4-139547/src/main/resources/descriptors/typesystems/VectorSpaceTypes.xml
  * @generated */
 public class Document extends Annotation {

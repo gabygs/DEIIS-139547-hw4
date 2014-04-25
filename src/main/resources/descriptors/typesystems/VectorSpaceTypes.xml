@@ -51,45 +51,5 @@
         </featureDescription>
       </features>
     </typeDescription>
-  <typeDescription>
-      <name>edu.cmu.lti.f13.hw4.hw4_139547.typesystems.Answer</name>
-      <description/>
-      <supertypeName>uima.tcas.Annotation</supertypeName>
-      <features>
-        <featureDescription>
-          <name>score</name>
-          <description>According to a certain similarity measure we obtain a score.</description>
-          <rangeTypeName>uima.cas.Double</rangeTypeName>
-        </featureDescription>
-        <featureDescription>
-          <name>rank</name>
-          <description>After obtaining a score all answers are ordered and their ranking is recorded in this manner.</description>
-          <rangeTypeName>uima.cas.Integer</rangeTypeName>
-        </featureDescription>
-      </features>
-    </typeDescription>
-    <typeDescription>
-      <name>edu.cmu.lti.f13.hw4.hw4_139547.typesystems.Query</name>
-      <description/>
-      <supertypeName>uima.tcas.Annotation</supertypeName>
-    </typeDescription>
-    <typeDescription>
-      <name>edu.cmu.lti.f13.hw4.hw4_139547.typesystems.VSretrieval</name>
-      <description/>
-      <supertypeName>uima.tcas.Annotation</supertypeName>
-      <features>
-        <featureDescription>
-          <name>mrr</name>
-          <description>Measure obtains from all documents and their raning.</description>
-          <rangeTypeName>uima.cas.Double</rangeTypeName>
-        </featureDescription>
-        <featureDescription>
-          <name>documentList</name>
-          <description/>
-          <rangeTypeName>uima.cas.FSList</rangeTypeName>
-          <elementType>edu.cmu.lti.f13.hw4.hw4_139547.typesystems.Document</elementType>
-        </featureDescription>
-      </features>
-    </typeDescription>
   </types>
 </typeSystemDescription>

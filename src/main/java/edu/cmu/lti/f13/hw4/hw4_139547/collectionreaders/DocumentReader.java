@@ -15,7 +15,7 @@ extends JCasAnnotator_ImplBase  {
 	@Override
 	public void process(JCas jcas) 
 			throws AnalysisEngineProcessException {
-		System.out.println("\n------------------Started DocumentReader ------------------\n");
+		//System.out.println("\n------------------Started DocumentReader ------------------\n");
 		
 		// reading sentence from the CAS 
 		String sLine = jcas.getDocumentText();
@@ -33,9 +33,9 @@ extends JCasAnnotator_ImplBase  {
 		int rel = Integer.parseInt(docInfo.get(0));
 		int qid = Integer.parseInt(docInfo.get(1));
 		String txt = docInfo.get(2);
-		System.out.println("rel: "+rel);
+		/*System.out.println("rel: "+rel);
 		System.out.println("quid: "+qid);
-		System.out.println("txt: "+txt);
+		System.out.println("txt: "+txt);*/
 		//Data parsed correctly until this point!!
 		
 		Document doc = new Document(jcas);
@@ -47,7 +47,7 @@ extends JCasAnnotator_ImplBase  {
 		//Adding populated FeatureStructure to CAS
 		jcas.addFsToIndexes(doc);
 		
-		System.out.println("\n------------------------------------------------------------------------\n");
+		//System.out.println("\n------------------------------------------------------------------------\n");
 		
 	}
 

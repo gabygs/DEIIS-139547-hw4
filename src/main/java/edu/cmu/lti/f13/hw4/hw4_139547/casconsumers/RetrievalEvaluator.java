@@ -2,6 +2,8 @@ package edu.cmu.lti.f13.hw4.hw4_139547.casconsumers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -29,22 +31,31 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 	public ArrayList<Integer> relList;
 
 	/** global words**/
-	public ArrayList<String> globalDictionary;
-	public int numQuerries;
+	public Map<String, Integer> globalDictionary;
+	public ArrayList<String> docText;
+	public ArrayList<String> corText;
+	public ArrayList<String> querries;
 	
+	public int numQuerries;
+
 	/** relevant ranks, use them for MRR **/
-	public ArrayList<Double> ranks;
+	public ArrayList<Integer> ranks;
+	
+	/**Documents**/
+	public ArrayList<Map<String,Integer>> tdfVectors;
 
 
 
 	public void initialize() throws ResourceInitializationException {
-
 		qIdList = new ArrayList<Integer>();
 		relList = new ArrayList<Integer>();
-		globalDictionary = new ArrayList<String>();
-		ranks = new ArrayList<Double>();
-		numQuerries=0;
-
+		docText = new ArrayList<String>();
+		corText = new ArrayList<String>();
+		querries = new ArrayList<String>();
+		ranks = new ArrayList<Integer>();
+		globalDictionary = new HashMap<String,Integer>();
+		numQuerries=3;
+		tdfVectors = new ArrayList<Map<String,Integer>>();
 	}
 
 	/**
@@ -53,9 +64,9 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 	 */
 	@Override
 	public void processCas(CAS aCas) throws ResourceProcessException {
-		ArrayList<Integer> dummyIds = new ArrayList<Integer>();
-		
-		
+		//ArrayList<Integer> dummyIds = new ArrayList<Integer>();
+
+		Map<String,Integer> vector =new HashMap<String,Integer>();
 		JCas jcas;
 		try {
 			jcas =aCas.getJCas();
@@ -64,63 +75,135 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 		}
 
 		FSIterator it = jcas.getAnnotationIndex(Document.type).iterator();
-
+		//int i=0;
 		if (it.hasNext()) {
-			Document doc = (Document) it.next();
+			Document dummy = (Document) it.next();
+			//i++;
 
-			//Make sure that your previous annotators have populated this in CAS
-			FSList fsTokenList = doc.getTokenList();
+			FSList fsTokenList = dummy.getTokenList();
 
-			System.out.println("Doc: " + doc.getText()); 
-			for (Token t :Utils.fromFSListToCollection(fsTokenList, Token.class))
-				globalDictionary.add(t.getText());
-			//System.out.println("TokenList contains: " + t.getText() + " -- Frequency: " + t.getFrequency());
+			for (Token t :Utils.fromFSListToCollection(fsTokenList, Token.class)){
+				globalDictionary.put(t.getText(), t.getFrequency());
+				vector.put(t.getText(), t.getFrequency());
+				//i++;
+			}
 
+			tdfVectors.add(vector);
+			//numToks.add(i);
+			//i=0;
+			docText.add(dummy.getText());
 
-			ArrayList<Token>tokenList=Utils.fromFSListToCollection(fsTokenList, Token.class);
-
+			//ArrayList<Token>tokenList=Utils.fromFSListToCollection(fsTokenList, Token.class);
 			//System.out.println("getQueryID(): "+doc.getQueryID() + " -- getText: " + doc.getText() + " -- getRelevanceValue: " + doc.getRelevanceValue());
 
-			qIdList.add(doc.getQueryID());
-			relList.add(doc.getRelevanceValue());
-			if(!dummyIds.contains(doc.getQueryID())){
-				dummyIds.add(doc.getQueryID());
-				System.out.println("dummyID: "+doc.getQueryID());
-				numQuerries=numQuerries+1;
+			qIdList.add(dummy.getQueryID());
+			relList.add(dummy.getRelevanceValue());		
+			if(dummy.getRelevanceValue()==1){
+				corText.add(dummy.getText());
 			}
-			//Do something useful here
+			if(dummy.getRelevanceValue()==99){
+				querries.add(dummy.getText());
+			}
 		}//if
-
-		System.out.println("numQuerries: "+numQuerries);
-		
 	}
 
 	/**
 	 * TODO 1. Compute Cosine Similarity and rank the retrieved sentences 2.
 	 * Compute the MRR metric
 	 */
+	// TODO :: compute the cosine similarity measure
+	// TODO :: compute the rank of retrieved sentences
+	// TODO :: compute the metric:: mean reciprocal rank
 	@Override
 	public void collectionProcessComplete(ProcessTrace arg0)
 			throws ResourceProcessException, IOException {
-
-		//System.out.println("\n------------------------------------------------------------------------\n");
-		System.out.println("\n------------------Started RetrievalEvaluator ------------------\n");
+		
+		Map<String, Integer> queryVector = new HashMap<String, Integer>();
+		Map<String, Integer> docVector= new HashMap<String, Integer>();
+		ArrayList<Double> localScores = new ArrayList<Double>();
+		ArrayList<Double> dScores = new ArrayList<Double>();
+		ArrayList<Integer> localRanks = new ArrayList<Integer>();
+		ArrayList<Integer> indexes =new ArrayList<Integer>();
+		ArrayList<Double> correctScores =new ArrayList<Double>();
+		int rel=0;
+		int countAnws=0,countQs=1, qNum=0, aNum=0;
 
 		super.collectionProcessComplete(arg0);
 
-		// TODO :: compute the cosine similarity measure
+		relList.add(99);
+		for(int docsIt=0;docsIt<(qIdList.size()+1);docsIt++){
+			
+			//check first for queries
+			if(relList.get(rel)==99){
+				if(docsIt<qIdList.size())
+					queryVector=tdfVectors.get(rel);				
+				
+				if(aNum > 0){
+					Collections.sort(localScores);
+					Collections.reverse(localScores);
+	
+					//sort acording to Scores
+					for(double d : dScores)
+						localRanks.add(localScores.indexOf(d));
+					//find correct answers
+					int countArr=0, indCorAnw=0;
+					for(int rels=(rel-aNum);rels<(rel+1);rels++){
+						countArr++;
+						if(relList.get(rels)==1){
+							indCorAnw=countArr-1;
+							indexes.add(rels);
+						}
+					}
+					//correct rank!!
+					int inx = localRanks.indexOf(indCorAnw);
+					if(inx==-1){
+						ranks.add(1);
+						correctScores.add(localScores.get(0));
+					}else{
+						ranks.add(localRanks.get(inx)+1);
+						correctScores.add(localScores.get(inx));
+					}
+					dScores.clear();
+					localScores.clear();
+					localRanks.clear();
+					qNum++;
+					
+				}//if aNum
+				aNum=0;
+				countQs=1;
+			}else{
+				//check for answers corresponding to query
+				docVector=tdfVectors.get(rel);
+				countAnws=1;
+			}//else
 
+			if(countAnws==1 && countAnws==1){
+				localScores.add(computeCosineSimilarity(queryVector, docVector));
+				dScores.add(computeCosineSimilarity(queryVector, docVector));
+				countAnws=0;
+				aNum++;
+			}//IF
+			rel++;
+		}//FOR
+		
 
+		double metric_mrr = compute_mrr();
+		
+		printAnswers(correctScores);
+		System.out.println("(MRR) Mean Reciprocal Rank ::" + metric_mrr+"\n\n");
+		
+	}
 
-		// TODO :: compute the rank of retrieved sentences
-
-
-
-		// TODO :: compute the metric:: mean reciprocal rank
-		//double metric_mrr = compute_mrr();
-		//System.out.println(" (MRR) Mean Reciprocal Rank ::" + metric_mrr);
-		System.out.println("\n------------------------------------------------------------------------\n");
-
+	
+	private void printAnswers(ArrayList<Double> correctScores){
+		int i=0;
+		for(double s: correctScores){
+			System.out.println("Query: "+querries.get(i));
+			System.out.println("Correct Answer: "+corText.get(i));
+			System.out.println("Score: "+ s + "\t rank ="+ranks.get(i)+"\t quid="+(i+1)+"\n");
+			i++;
+		}
+		
 	}
 
 	/**
@@ -140,7 +223,7 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 			String qKey = (String)querrySet.getKey();
 			Integer qVal = (Integer)querrySet.getValue();
 
-			if(globalDictionary.contains(qKey) && docVector.containsKey(qKey)){
+			if(globalDictionary.containsKey(qKey) && docVector.containsKey(qKey)){
 				dotProduct = dotProduct + (qVal.doubleValue() * docVector.get(qKey).doubleValue());
 			}
 		}
@@ -159,11 +242,11 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 	private double vectorMagnitude(Map<String, Integer> vector){
 		double vectMagnitude=0.0;
 		Iterator vectorIter = vector.entrySet().iterator();
-		
+
 		while(vectorIter.hasNext()) {
 			Map.Entry vectorSet = (Map.Entry)vectorIter.next();
 			double freq = ((Integer)vectorSet.getValue()).doubleValue();
-			
+
 			vectMagnitude = vectMagnitude +(freq * freq);
 		}
 		vectMagnitude = Math.sqrt(vectMagnitude);
@@ -178,12 +261,12 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 	// TODO :: compute Mean Reciprocal Rank (MRR) of the text collection
 	private double compute_mrr() {
 		double metric_mrr=0.0, sum_ranks=0.0;
-		
+
 		for(int i=0;i<numQuerries;i++)
 			sum_ranks = sum_ranks + (1.0/ranks.get(i));
-		
+
 		metric_mrr=(1.0/numQuerries)* sum_ranks;
-			
+
 		return metric_mrr;
 	}
 

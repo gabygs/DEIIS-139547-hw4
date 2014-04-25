@@ -24,7 +24,7 @@ public class DocumentVectorAnnotator extends JCasAnnotator_ImplBase {
 
 	@Override
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
-		System.out.println("\n------------------Started DocumentVectorAnnotator ------------------\n");
+		//System.out.println("\n------------------Started DocumentVectorAnnotator ------------------\n");
 
 		BufferedReader br = null;
 		String stopWsFile="src/main/resources/stopwords.txt";
@@ -56,8 +56,7 @@ public class DocumentVectorAnnotator extends JCasAnnotator_ImplBase {
 			Document doc = (Document) iter.get();
 			createTermFreqVector(jcas, doc);
 		}
-		System.out.println("\n------------------------------------------------------------------------\n");
-
+	
 	}
 	/**
 	 * 
@@ -85,7 +84,6 @@ public class DocumentVectorAnnotator extends JCasAnnotator_ImplBase {
 			if(stopWords.contains(wordFound)){
 				//ignore stopWords
 				position=position+wordFound.length()+1;
-				//System.out.println("Stop word: "+wordFound+" size: "+wordFound.length() );
 			}else{
 				//ADD TOKEN
 				Token token = new Token(jcas);
