@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
@@ -179,7 +181,12 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 
 			if(countAnws==1 && countAnws==1){
 				localScores.add(computeCosineSimilarity(queryVector, docVector));
+				//localScores.add(computeTanimotoSimilarity(queryVector, docVector));
+				//localScores.add(computeJaccardSimilarity(queryVector, docVector));
+				
 				dScores.add(computeCosineSimilarity(queryVector, docVector));
+				//dScores.add(computeTanimotoSimilarity(queryVector, docVector));
+				//dScores.add(computeJaccardSimilarity(queryVector, docVector));
 				countAnws=0;
 				aNum++;
 			}//IF
@@ -237,7 +244,46 @@ public class RetrievalEvaluator extends CasConsumer_ImplBase {
 		return cosine_similarity;
 	}
 
+	private double computeJaccardSimilarity(Map<String, Integer> queryVector, Map<String, Integer> docVector) {
+		double jacc_similarity=0.0, queryMagn=0.0, docMagn=0.0, dotProduct=0.0;
+		Iterator queryIt = queryVector.entrySet().iterator();
 
+		Set<String> intersection = new HashSet<String>(queryVector.keySet());
+		intersection.retainAll(docVector.keySet());
+
+		jacc_similarity = (intersection.size()) / (queryVector.keySet().size()+docVector.keySet().size());
+
+		return jacc_similarity;
+	}
+
+	
+	
+	
+	private double computeTanimotoSimilarity(Map<String, Integer> queryVector, Map<String, Integer> docVector) {
+		double tanimoto_similarity=0.0, queryMagn=0.0, docMagn=0.0, dotProduct=0.0;
+		Iterator queryIt = queryVector.entrySet().iterator();
+
+		//calculate dotProduct
+		while(queryIt.hasNext()){
+			Map.Entry querrySet = (Map.Entry)queryIt.next();
+			String qKey = (String)querrySet.getKey();
+			Integer qVal = (Integer)querrySet.getValue();
+
+			if(globalDictionary.containsKey(qKey) && docVector.containsKey(qKey)){
+				dotProduct = dotProduct + (qVal.doubleValue() * docVector.get(qKey).doubleValue());
+			}
+		}
+		//calculate magnitude
+		queryMagn=vectorMagnitude(queryVector);
+		docMagn=vectorMagnitude(docVector);
+
+		//calculate cosine similarity
+		tanimoto_similarity = dotProduct / ((queryMagn + docMagn)*dotProduct);
+
+		return tanimoto_similarity;
+	}
+
+	
 	@SuppressWarnings("rawtypes")
 	private double vectorMagnitude(Map<String, Integer> vector){
 		double vectMagnitude=0.0;
